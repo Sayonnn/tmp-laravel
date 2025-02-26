@@ -35,8 +35,11 @@ return [
         ],
     ],
 
-    'passport' => [
-        
-    ]
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_name' => env('GOOGLE_CLIENT_NAME'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_CLIENT_CALLBACK'),
+    ],
 
 ];
