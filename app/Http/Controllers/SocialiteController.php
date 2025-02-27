@@ -45,9 +45,9 @@ class SocialiteController extends Controller
             dd($th);
         }
     }
-
-    // NOTE: this method accepts the verified datas from the passport server
+    
     // NOTE: this will redirect the client to the passport oauth/authorize page
+    // NOTE: this method accepts the verified datas from the passport server
     public function passportAuthorization()
     {
         try {
@@ -102,8 +102,6 @@ class SocialiteController extends Controller
         session('refresh_token', $tokenData['refresh_token']);
         // dd($tokenData['access_token']);
 
-        dd($tokenData);
-        // automate login here
         // NOTE: we send the google token to the server for validation here
         $users = Http::withHeaders([
             'Content-Type' => 'application/json',
@@ -118,95 +116,47 @@ class SocialiteController extends Controller
         }
         $user = $users->json();
 
-        // auto login the user
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Invalid user data received.');
+        // log the user to the system
+        $logged = $this->logUser($user);
+
+        // Redirect to the dashboard if user logged in successfully
+        if ($logged) {
+            sleep(2);
+            return redirect()->route('dashboard');
         }
-        
-        // Check if user exists in the database
+    }
+
+    // NOTE: This method ensure that the user is logged in 
+    public function logUser($user)
+    {
+        if (!$user) {
+            return false;
+        }
+
+        // we check if the user exist in the database
         $existingUser = User::where('google_id', $user['google_id'])->first();
-        
+
         if ($existingUser) {
             Auth::login($existingUser);
         } else {
             $newUser = User::create([
                 'name' => $user['name'],
                 'email' => $user['email'],
-                'password' => Hash::make(Str::random(16)), // Secure random password
+                'password' => Hash::make(Str::random(16)),
                 'google_id' => $user['google_id'],
             ]);
-        
+
             Auth::login($newUser);
         }
-        
-        // Redirect to the dashboard
-        return redirect()->route('dashboard');
-        // Success: Return the response from Passport Server
-
-        // 🔹 Return or store the access token for future API requests
-        // return response()->json(['response' => $users->json()]);
+        return true;
     }
 
-
-    // NOTE: This route send the google token to passport server for verification
-    public function goAuthorize()
-    {
-        try {
-            $googleUser = Socialite::driver('google')->user();
-            // dd($googleUser);
-
-            $user = User::where('google_id', $googleUser->id)->first();
-            // dd($user);
-
-            if (!$user) {
-                User::create([
-                    'name' => $googleUser->name,
-                    'email' => $googleUser->email,
-                    'password' => Hash::make('Password@1234'),
-                    'google_id' => $googleUser->id,
-                ]);
-            }
-            Auth::login($user);
-
-
-            // NOTE: We also pass the client_id and client_secret so that passport server can save it
-            // NOTE: We should also pass the login infos so passport can recognize it
-            $secrets = [
-                'clientID' => config('services.google.client_id'),
-                'clientSecret' => config('services.google.client_secret'),
-                'clientName' => config('services.google.client_name'),
-                'callback' => config('services.passport.callback')
-            ];
-
-            // dd($secrets);
-
-            // NOTE: we send the google token to the server for validation here
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post(config('services.passport.verify'), ['token' => $googleUser->token, 'user' => $googleUser, 'secrets' => $secrets]);
-
-            // NOTE: we call the passportRedirect method here passsing the verified datas
-            if ($response->successful()) {
-                // TEST
-                dd($response->json());
-                // return $this->passportRedirect($response->json());
-            } else {
-                dd("failed");
-            }
-            // return redirect('/dashboard');
-        } catch (\Throwable $th) {
-            dd($th);
-        }
-    }
-
-
-
-    public function requestToken(Request $request)
+    public function refreshToken(Request $request)
     {
         try {
             // METHOD: POST
             // NOTE: we use the authtoken and client credentials to make a request to passport server oauth/token api
-            // NOTE: This should be use only to exchange authToken with accessToken
+            // NOTE: This should be 
             $response = $request->json();
             dd($response);
         } catch (\Throwable $th) {

@@ -25,12 +25,11 @@ Route::controller(SocialiteController::class)->group(function () {
     // NOTE: This route process the google authentication : This includes sending the google_token to passport server after google authentication
     Route::get('/auth/google-callback', 'googleAuthentication')->name('auth.google-callback');
 
-
     Route::get('/oauth/authorize', 'passportAuthorization')->name('oauth.authorize');
     // NOTE: This route get the authorization code from passport that will be sent after verifying the google token sent by the client
     Route::get('/oauth/callback', 'passportCallback')->name('auth.callback');
-    // NOTE: This route is use to exchange authToken with accessToken
-    // Route::post('/oauth/request-token', 'requestToken')->name('auth.request-token');
+    // NOTE: This route is use to refresh tokens
+    Route::post('/oauth/refresh-token', 'refreshToken')->name('auth.refresh-token');
 });
 
 require __DIR__.'/auth.php';
