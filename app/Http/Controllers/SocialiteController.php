@@ -12,44 +12,49 @@ use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteController extends Controller
 {
-    public function googleLogin()
-    {
-        return Socialite::driver('google')->redirect();
-    }
+    // public function googleLogin()
+    // {
+    //     return Socialite::driver('google')->redirect();
+    // }
 
     // NOTE: This route is not associated with passport
     // this route logs the user using google account directly using socialite
-    public function googleAuthentication()
-    {
+    // public function googleAuthentication()
+    // {
 
-        try {
-            $googleUser = Socialite::driver('google')->user();
+    //     try {
+    //         $googleUser = Socialite::driver('google')->user();
 
-            $user = User::where('google_id', $googleUser->id)->first();
-            if ($user) {
-                Auth::login($user);
-                return redirect()->route('dashboard');
-            } else {
-                $userData = User::create([
-                    'name' => $googleUser->name,
-                    'email' => $googleUser->email,
-                    'password' => Hash::make('Password@1234'),
-                    'google_id' => $googleUser->id,
-                ]);
-                if ($userData) {
-                    Auth::login($userData);
-                    return redirect()->route('dashboard');
-                }
-            }
-        } catch (\Throwable $th) {
-            dd($th);
-        }
-    }
+    //         $user = User::where('google_id', $googleUser->id)->first();
+    //         if ($user) {
+    //             Auth::login($user);
+    //             return redirect()->route('dashboard');
+    //         } else {
+    //             $userData = User::create([
+    //                 'name' => $googleUser->name,
+    //                 'email' => $googleUser->email,
+    //                 'password' => Hash::make('Password@1234'),
+    //                 'google_id' => $googleUser->id,
+    //             ]);
+    //             if ($userData) {
+    //                 Auth::login($userData);
+    //                 return redirect()->route('dashboard');
+    //             }
+    //         }
+    //     } catch (\Throwable $th) {
+    //         dd($th);
+    //     }
+    // }
     
     // NOTE: this will redirect the client to the passport oauth/authorize page
     // NOTE: this method accepts the verified datas from the passport server
-    public function passportAuthorization()
+    public function passportAuthorization(Request $request)
     {
+
+        $url = $request->url();
+        $cleanURL = str_replace("oauth/authorize", "", $url);
+        
+        // what if i put and offset here to check if the client is logged on the server using session
         try {
             $client_id = config('services.socialite.client_id');
             $callbackURI = config('services.socialite.callback');
@@ -64,7 +69,9 @@ class SocialiteController extends Controller
 
             // dd($url);
 
-            return redirect($url);
+            return redirect($url)->withHeaders([
+                'Access-Control-Allow-Credentials' => 'true',
+            ]);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()], 500);
         }

@@ -21,9 +21,9 @@ Route::middleware('auth')->group(function () {
 // socialite routes
 Route::controller(SocialiteController::class)->group(function () {
     // NOTE: This route redirect the user to the google authentication page
-    Route::get('/auth/google', 'googleLogin')->name('auth.google');
+    // Route::get('/auth/google', 'googleLogin')->name('auth.google');
     // NOTE: This route process the google authentication : This includes sending the google_token to passport server after google authentication
-    Route::get('/auth/google-callback', 'googleAuthentication')->name('auth.google-callback');
+    // Route::get('/auth/google-callback', 'googleAuthentication')->name('auth.google-callback');
 
     Route::get('/oauth/authorize', 'passportAuthorization')->name('oauth.authorize');
     // NOTE: This route get the authorization code from passport that will be sent after verifying the google token sent by the client
