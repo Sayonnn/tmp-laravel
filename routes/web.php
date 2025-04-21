@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
@@ -26,6 +26,12 @@ Route::controller(ServerController::class)->group(function () {
     // NOTE: This route process the google authentication : This includes sending the google_token to passport server after google authentication
     Route::get('/auth/google-callback', 'googleAuthentication')->name('auth.google-callback');
 });
+
+Route::post('/passport/repo', function (Request $request) {
+    dd( $request->user());
+})->middleware(['auth'])->name('passport.repo');
+
+
 
 Route::get('/dashboard/clients', function (Request $request) {
 

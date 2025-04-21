@@ -45,11 +45,17 @@ class ServerController extends Controller
 
             // then we redirect them to dashboard
             // NOTE: This is required to ensure the is authorize to access the dashboard
-
+            // maybe require everyone to log as google? then only the admin should create manual account?
+            // return redirect()->route('dashboard');
             return redirect()->away('http://localhost:8080/dashboard');
+
         } catch (\Throwable $th) {
             dd($th);
         }
+    }
+
+    public function getClientDatas(){
+        
     }
 
     // return the user and log the user on the application
@@ -67,20 +73,4 @@ class ServerController extends Controller
             return response()->json(['error' => 'Something went wrong', 'message' => $th->getMessage()], 500);
         }
     }
-    
-    // this return the passport oauth/authorize page to the client
-    // // TEST: maybe i should remove this??
-    // public function redirectClient()
-    // {
-    //     return view('vendor.passport.authorize');
-    // }
-
-
-
-    // testing purposes
-    // public function test(Request $request)
-    // {
-    //     $googleToken = $request->input('google_token');
-    //     return response()->json(['response' => "Hi  I am server, you said this is your token right: $googleToken"]);
-    // }
 }
